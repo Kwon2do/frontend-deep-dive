@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <title>콜백(promise, async없을때)</title>
+  </head>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    const myCallback = () => {
+      const aa = new XMLHttpRequest();
+      aa.open("GET", "http://numbersapi.com/random?min=1&max=200");
+      aa.send();
+      aa.addEventListener("load", (res) => {
+        const num = res.target.response.split(" ")[0];
+
+        const bb = new XMLHttpRequest();
+        bb.open("GET", `https://koreanjson.com/posts/${num}`);
+        bb.send();
+        bb.addEventListener("load", (res) => {
+          console.log(res);
+          const userId = JSON.parse(res.target.response).UserId;
+
+          const cc = new XMLHttpRequest();
+          cc.open("GET", `https://koreanjson.com/posts?userId=${userId}`);
+          cc.send();
+          cc.addEventListener("load", (res) => {
+            console.log(res);
+          });
+        });
+      });
+    };
+    // new Promise((resolve, reject) => {
+    //   try {
+    //     //여기서 API 요청 했을때
+    //     const res = "철수"; //"철수" 데이터 받아옴
+    //     resolve(res); //성공하면 이거 실행, 반환값은 첫번째 then으로 전달됨
+    //   } catch (e) {
+    //     reject(e); //실패하면 이거 실행, 반환값은 catch로 전달됨
+    //   }
+    // })
+    //   .then((res) => {
+    //     console.log(res);
+    //   })
+    //   .catch((e) => {
+    //     console.log(e);
+    //   });
+    const axios = {
+      get: () => {
+        return new Promise((성공시, 실패시) => {});
+      },
+      post: () => {
+        return new Promise((성공시, 실패시) => {});
+      },
+    };
+    //결국 axios가 promise로 만들어져있음. (fetch, useMutation 마찬가지)
+    //그래서 .then 가능
+    const myPromise = () => {
+      // 여전히 콜백지옥 모양
+      //   axios.get(`http://numbersapi.com/random?min=1&max=200`).then((qqq) => {
+      //     axios.get(`https://koreanjson.com/posts/${num}`).then((www) => {
+      //       axios
+      //         .get(`https://koreanjson.com/posts?userId=${userId}`)
+      //         .then((eee) => {
+      //           console.log(eee);
+      //         });
+      //     });
+      //   });
+      //Promise 체이닝 -> promise를 return해야만 다음 then으로 전달됨
+      console.log("1번째 실행");
+      axios
+        .get(`http://numbersapi.com/random?min=1&max=200`) //요청결과 -> 아래 qqq로 들어감
+        .then((qqq) => {
+          console.log("2번째 실행");
+          return axios.get(`https://koreanjson.com/posts/${num}`); //요청결과 -> 아래 www로 들어감
+        })
+        .then((www) => {
+          console.log("3번째 실행");
+          return axios.get(`https://koreanjson.com/posts?userId=${userId}`); //요청결과 -> 아래 eee로 들어감
+        })
+        .then((eee) => {
+          console.log("4번째 실행");
+          console.log(eee);
+        });
+      console.log("5번째 실행");
+    };
+    //순서가 1,5,2,3,4 직관적이지 못함-> 이벤트 루프 원리로 -> async/await의 등장
+
+    //axios, fetch 등 => 대표적인 promise를 지원하는 기능
+    //axios, fetch 등을 기다리는 2가지 방법
+    // 1. .then() 활용
+    // 2. await 활용 => 주의) await은 아무데나 붙인다고 뒤에껄 기다리는 게 아님! 무조건 Promise 앞에다가 붙여야 기능함)
+
+    const myAsync = async () => {
+      await axios.get(`http://numbersapi.com/random?min=1&max=200`);
+      await axios.get(`https://koreanjson.com/posts/${num}`);
+      await axios.get(`https://koreanjson.com/posts?userId=${userId}`);
+    };
+  </script>
+  <body>
+    <button onclick="myCallback()">Callback 연습하기</button>
+    <button onclick="myPromise()">Promise 연습하기</button>
+    <button onclick="myAsync()">Async/Await 연습하기</button>
+  </body>
+</html>
