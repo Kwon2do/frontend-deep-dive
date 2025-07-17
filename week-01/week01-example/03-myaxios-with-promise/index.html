@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <title>나만의 axios 만들기</title>
+    <script>
+      const myaxios = {
+        get: (url) => {
+          return new Promise((resolve, reject) => {
+            const qq = new XMLHttpRequest();
+            qq.open("GET", url);
+            qq.send();
+            qq.addEventListener("load", (res) => {
+              resolve(res.target.response);
+            });
+          });
+        },
+        //post: (url) => {} //get과 동일한 방식임
+      };
+      //Promise를 반환해주기 때문에, .then()으로 데이터를 받을 수 있음
+      const onClickAxios = async () => {
+        // 1. .then()으로 받기
+        myaxios.get("https://koreanjson.com/posts/1").then((res) => {
+          console.log(".then() 사용", res);
+        });
+        // 2. await으로 받기
+        const result = await myaxios.get("https://koreanjson.com/posts/1");
+        console.log("await 사용", result);
+      };
+    </script>
+  </head>
+  <body>
+    <button onclick="onClickAxios()">나만의 axios 요청하기</button>
+  </body>
+</html>
